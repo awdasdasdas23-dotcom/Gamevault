@@ -1,0 +1,442 @@
+
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GameVault</title>
+<style>
+*{box-sizing:border-box}
+:root{--bg:#090d18;--panel:#111a2c;--panel2:#17243a;--blue:#5585ff;--text:#f3f6ff;--muted:#9ba9c2}
+body{margin:0;background:var(--bg);color:var(--text);font-family:Arial,sans-serif}
+button,input,select{font:inherit}
+button{cursor:pointer}
+header{background:#10182a;border-bottom:1px solid #273550;padding:17px 5%;display:flex;align-items:center;justify-content:space-between;gap:15px;flex-wrap:wrap}
+.logo{font-size:25px;font-weight:900;color:#78a0ff}
+.logo span{color:white}
+nav{display:flex;gap:8px;flex-wrap:wrap}
+nav button,.btn{border:0;border-radius:9px;padding:10px 13px;background:#202e48;color:white}
+nav button:hover,.btn:hover{background:#365b9c}
+nav button.active{background:var(--blue)}
+main{max-width:1200px;margin:auto;padding:25px 18px}
+.hero{padding:35px 25px;border-radius:18px;background:linear-gradient(120deg,#172d56,#38275f);margin-bottom:25px}
+.hero h1{font-size:clamp(28px,5vw,46px);margin:0 0 10px}
+.hero p{color:#d4ddf5;line-height:1.5}
+.hero button{background:#fff;color:#17264a;font-weight:bold;border:0;border-radius:9px;padding:12px 18px}
+.section{display:none}
+.section.active{display:block}
+h2{margin:8px 0 18px}
+.muted{color:var(--muted)}
+.menu-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:15px}
+.menu-card{background:var(--panel);padding:22px;border:1px solid #253653;border-radius:15px;cursor:pointer;transition:.2s}
+.menu-card:hover{transform:translateY(-4px);border-color:var(--blue)}
+.menu-card .emoji{font-size:35px}
+.menu-card h3{margin:12px 0 6px}
+.tools{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:18px}
+input,select{background:#111a2c;color:white;border:1px solid #34435e;border-radius:9px;padding:12px;min-width:0}
+.tools input{flex:1;min-width:180px}
+.game-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:15px}
+.game-card{background:var(--panel);border:1px solid #263653;border-radius:13px;overflow:hidden}
+.game-card img{width:100%;height:130px;object-fit:cover;background:#202b40}
+.game-info{padding:13px}
+.game-info h3{margin:0 0 8px;font-size:17px}
+.game-info p{font-size:13px;color:var(--muted);min-height:32px}
+.tag{display:inline-block;background:#263957;color:#c9d9ff;padding:5px 8px;border-radius:6px;font-size:11px;margin:2px}
+.game-info button{width:100%;margin-top:9px}
+.panel{background:var(--panel);border:1px solid #293957;border-radius:15px;padding:20px;margin-bottom:15px}
+.tier-row{display:grid;grid-template-columns:55px 1fr;gap:10px;margin:10px 0;min-height:65px}
+.tier-label{display:grid;place-items:center;border-radius:10px;font-size:24px;font-weight:900;color:#111}
+.tier-items{background:#111a2c;border:1px dashed #42516b;border-radius:10px;padding:9px;display:flex;gap:7px;flex-wrap:wrap;align-items:center}
+.tier-game{background:#263957;padding:8px 10px;border-radius:8px;font-size:13px}
+.quiz-image{width:min(100%,420px);height:190px;object-fit:contain;background:#0b1220;border-radius:12px;margin:12px 0}
+.quiz-options{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:15px}
+.quiz-options button{background:#243552;color:white;border:1px solid #3b5279;padding:14px;border-radius:9px}
+.quiz-options button:hover{background:#385c99}
+.result{font-weight:bold;margin-top:15px;min-height:25px}
+.modal{position:fixed;inset:0;background:#000b;display:none;align-items:center;justify-content:center;padding:18px;z-index:10}
+.modal.show{display:flex}
+.modal-box{background:#121d31;border:1px solid #3a4d70;border-radius:16px;padding:20px;max-width:550px;width:100%;max-height:85vh;overflow:auto}
+.modal-box img{width:100%;max-height:220px;object-fit:cover;border-radius:10px}
+.close{float:right;background:#34435e;border:0;color:white;padding:8px 12px;border-radius:7px}
+footer{text-align:center;color:#75849e;padding:30px 10px}
+.small{font-size:12px;color:var(--muted)}
+@media(max-width:600px){
+header{padding:14px}
+nav{width:100%}
+nav button{flex:1;font-size:12px;padding:9px 5px}
+main{padding:18px 12px}
+.hero{padding:25px 18px}
+.quiz-options{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<header>
+ <div class="logo">🎮 Game<span>Vault</span></div>
+ <nav>
+  <button class="active" onclick="showSection('home',this)">Ana Sayfa</button>
+  <button onclick="showSection('catalog',this)">Oyunlar</button>
+  <button onclick="showSection('tiers',this)">Sıralama</button>
+  <button onclick="showSection('quiz',this)">Bilgi Yarışması</button>
+  <button onclick="showSection('logos',this)">Logo Tahmini</button>
+ </nav>
+</header>
+
+<main>
+<section id="home" class="section active">
+ <div class="hero">
+  <h1>Oyun dünyasına hoş geldin!</h1>
+  <p>Oyunları keşfet, favorilerini sırala ve oyun bilgini test et.</p>
+  <button onclick="showSection('catalog')">Oyunları keşfet →</button>
+ </div>
+ <h2>GameVault'ta seni neler bekliyor?</h2>
+ <div class="menu-grid">
+  <div class="menu-card" onclick="showSection('catalog')">
+   <div class="emoji">🕹️</div><h3>Oyun Kataloğu</h3>
+   <p class="muted">Birbirinden farklı oyunları keşfet ve bilgilerini incele.</p>
+  </div>
+  <div class="menu-card" onclick="showSection('tiers')">
+   <div class="emoji">🏆</div><h3>Oyun Sıralaması</h3>
+   <p class="muted">Oyunları S, A, B, C ve D kademelerine yerleştir.</p>
+  </div>
+  <div class="menu-card" onclick="showSection('quiz')">
+   <div class="emoji">🧠</div><h3>Oyunu Tahmin Et</h3>
+   <p class="muted">İpuçlarını okuyarak doğru oyunu bul.</p>
+  </div>
+  <div class="menu-card" onclick="showSection('logos')">
+   <div class="emoji">🖼️</div><h3>Görselden Tahmin Et</h3>
+   <p class="muted">Oyun görseline bak ve oyunun adını tahmin et.</p>
+  </div>
+ </div>
+ <div class="panel" style="margin-top:20px">
+  <h3>📊 GameVault</h3>
+  <p class="muted">Katalogdaki oyun sayısı: <strong id="totalGames">Yükleniyor...</strong></p>
+  <p class="small">Oyun bilgileri FreeToGame kataloğundan alınır.</p>
+ </div>
+</section>
+
+<section id="catalog" class="section">
+ <h2>🕹️ Oyun Kataloğu</h2>
+ <p class="muted">Oyunları ara, filtrele ve detaylarını incele.</p>
+ <div class="tools">
+  <input id="search" placeholder="Oyun adı ara..." oninput="renderGames()">
+  <select id="platform" onchange="renderGames()">
+   <option value="">Tüm platformlar</option>
+   <option value="PC (Windows)">Bilgisayar</option>
+   <option value="Web Browser">Tarayıcı</option>
+  </select>
+  <select id="genre" onchange="renderGames()">
+   <option value="">Tüm türler</option>
+  </select>
+ </div>
+ <p class="small" id="catalogStatus">Oyunlar yükleniyor...</p>
+ <div class="game-grid" id="gameGrid"></div>
+</section>
+
+<section id="tiers" class="section">
+ <h2>🏆 Oyun Sıralaması</h2>
+ <p class="muted">Kendi oyun kademeni oluştur. Oyun seç ve istediğin seviyeye ekle.</p>
+ <div class="panel">
+  <div class="tools">
+   <select id="tierGame" style="flex:1">
+    <option value="">Oyun seç</option>
+   </select>
+   <select id="tierLevel">
+    <option value="S">S Kademesi</option>
+    <option value="A">A Kademesi</option>
+    <option value="B">B Kademesi</option>
+    <option value="C">C Kademesi</option>
+    <option value="D">D Kademesi</option>
+   </select>
+   <button class="btn" onclick="addTier()">Ekle</button>
+  </div>
+  <button class="btn" onclick="clearTiers()">Sıralamayı temizle</button>
+ </div>
+ <div id="tierBoard"></div>
+</section>
+
+<section id="quiz" class="section">
+ <h2>🧠 Oyunu Tahmin Et</h2>
+ <p class="muted">İpuçlarını oku ve doğru oyunu bulmaya çalış.</p>
+ <div class="panel">
+  <div class="tag">BİLGİ YARIŞMASI</div>
+  <h3 id="clueTitle">Hazır mısın?</h3>
+  <p id="clueText">Başlamak için aşağıdaki butona bas.</p>
+  <div class="quiz-options" id="quizOptions"></div>
+  <div class="result" id="quizResult"></div>
+  <button class="btn" style="margin-top:15px" onclick="nextQuiz()">Yeni soru</button>
+  <p class="small" id="quizScore">Doğru cevap: 0</p>
+ </div>
+</section>
+
+<section id="logos" class="section">
+ <h2>🖼️ Görselden Tahmin Et</h2>
+ <p class="muted">Görseldeki oyunu bulabilecek misin?</p>
+ <div class="panel">
+  <div class="tag">GÖRSEL TAHMİNİ</div>
+  <img id="logoImage" class="quiz-image" alt="Tahmin edilecek oyun görseli" style="display:none">
+  <p id="logoPrompt">Başlamak için yeni soru butonuna bas.</p>
+  <div class="quiz-options" id="logoOptions"></div>
+  <div class="result" id="logoResult"></div>
+  <button class="btn" style="margin-top:15px" onclick="nextLogo()">Yeni soru</button>
+  <p class="small" id="logoScore">Doğru cevap: 0</p>
+ </div>
+</section>
+</main>
+
+<div class="modal" id="detailModal" onclick="if(event.target===this)closeModal()">
+ <div class="modal-box">
+  <button class="close" onclick="closeModal()">Kapat ✕</button>
+  <div id="detailContent"></div>
+ </div>
+</div>
+
+<footer>🎮 GameVault · Oyunları keşfet, bilgini kanıtla!</footer>
+
+<script>
+let games=[];
+let filteredGames=[];
+let quizCorrect=0,logoCorrect=0;
+let currentQuiz=null,currentLogo=null;
+let usedQuiz=[],usedLogo=[];
+let tiers=JSON.parse(localStorage.getItem("gamevaultTiers")||"[]");
+
+const sampleGames=[
+ {id:1,title:"Fortnite",thumbnail:"https://www.freetogame.com/g/1/thumbnail.jpg",short_description:"Battle Royale ve inşa etme deneyimi.",genre:"Shooter",platform:"PC (Windows)",developer:"Epic Games",publisher:"Epic Games",release_date:"2017-09-26"},
+ {id:2,title:"Warframe",thumbnail:"https://www.freetogame.com/g/2/thumbnail.jpg",short_description:"Bilim kurgu dünyasında aksiyon dolu macera.",genre:"Shooter",platform:"PC (Windows)",developer:"Digital Extremes",publisher:"Digital Extremes",release_date:"2013-03-25"},
+ {id:3,title:"Albion Online",thumbnail:"https://www.freetogame.com/g/3/thumbnail.jpg",short_description:"Açık dünyada çevrim içi rol yapma oyunu.",genre:"MMORPG",platform:"PC (Windows)",developer:"Sandbox Interactive",publisher:"Sandbox Interactive",release_date:"2017-07-17"},
+ {id:4,title:"Dauntless",thumbnail:"https://www.freetogame.com/g/4/thumbnail.jpg",short_description:"Dev yaratıklara karşı mücadele et.",genre:"Action RPG",platform:"PC (Windows)",developer:"Phoenix Labs",publisher:"Phoenix Labs",release_date:"2019-05-21"}
+];
+
+async function loadGames(){
+ const status=document.getElementById("catalogStatus");
+ try{
+  const response=await fetch("https://www.freetogame.com/api/games");
+  if(!response.ok)throw new Error("Veri alınamadı");
+  const data=await response.json();
+  if(!Array.isArray(data)||!data.length)throw new Error("Oyun bulunamadı");
+  games=data;
+  status.textContent=games.length+" oyun listelendi.";
+ }catch(error){
+  games=sampleGames;
+  status.textContent="Çevrim içi katalog yüklenemedi. Örnek oyunlar gösteriliyor.";
+ }
+ filteredGames=games;
+ document.getElementById("totalGames").textContent=games.length;
+ fillGenres();
+ fillTierSelect();
+ renderGames();
+}
+
+function normalize(s){
+ return String(s||"").toLocaleLowerCase("tr")
+ .normalize("NFD").replace(/[\u0300-\u036f]/g,"")
+ .replace(/ı/g,"i").trim();
+}
+
+function fillGenres(){
+ const genres=[...new Set(games.map(g=>g.genre).filter(Boolean))].sort();
+ const select=document.getElementById("genre");
+ select.innerHTML='<option value="">Tüm türler</option>';
+ genres.forEach(g=>{
+  const option=document.createElement("option");
+  option.value=g;option.textContent=g;select.appendChild(option);
+ });
+}
+
+function fillTierSelect(){
+ const select=document.getElementById("tierGame");
+ select.innerHTML='<option value="">Oyun seç</option>';
+ games.forEach(g=>{
+  const option=document.createElement("option");
+  option.value=g.id;option.textContent=g.title;select.appendChild(option);
+ });
+}
+
+function renderGames(){
+ const query=normalize(document.getElementById("search").value);
+ const platform=document.getElementById("platform").value;
+ const genre=document.getElementById("genre").value;
+ filteredGames=games.filter(g=>{
+  const searchable=normalize([g.title,g.short_description,g.developer,g.publisher,g.genre].join(" "));
+  return searchable.includes(query)&&(!platform||g.platform===platform)&&(!genre||g.genre===genre);
+ });
+ const grid=document.getElementById("gameGrid");
+ grid.innerHTML="";
+ if(!filteredGames.length){
+  grid.innerHTML='<p class="muted">Bu aramayla eşleşen oyun bulunamadı.</p>';return;
+ }
+ filteredGames.forEach(g=>{
+  const card=document.createElement("div");
+  card.className="game-card";
+  card.innerHTML=`
+   <img src="${safeUrl(g.thumbnail)}" alt="" loading="lazy">
+   <div class="game-info">
+    <h3>${escapeHTML(g.title)}</h3>
+    <span class="tag">${escapeHTML(g.genre||"Bilinmiyor")}</span>
+    <span class="tag">${escapeHTML(g.platform||"Bilinmiyor")}</span>
+    <p>${escapeHTML(g.short_description||"Açıklama bulunmuyor.")}</p>
+    <button class="btn" onclick="showDetails(${Number(g.id)})">Detayları incele</button>
+   </div>`;
+  grid.appendChild(card);
+ });
+}
+
+function escapeHTML(s){
+ return String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+}
+function safeUrl(url){
+ try{const u=new URL(url);return ["https:","http:"].includes(u.protocol)?u.href:"";}catch{return "";}
+}
+
+async function showDetails(id){
+ let g=games.find(x=>Number(x.id)===id);
+ if(!g)return;
+ document.getElementById("detailModal").classList.add("show");
+ document.getElementById("detailContent").innerHTML="<h2>"+escapeHTML(g.title)+"</h2><p>Oyun bilgileri yükleniyor...</p>";
+ try{
+  const res=await fetch("https://www.freetogame.com/api/game?id="+id);
+  if(res.ok)g=await res.json();
+ }catch(e){}
+ document.getElementById("detailContent").innerHTML=`
+  <h2>${escapeHTML(g.title)}</h2>
+  <img src="${safeUrl(g.thumbnail)}" alt="">
+  <p>${escapeHTML(g.description||g.short_description||"Açıklama bulunmuyor.")}</p>
+  <p><b>Tür:</b> ${escapeHTML(g.genre||"Bilinmiyor")}</p>
+  <p><b>Platform:</b> ${escapeHTML(g.platform||"Bilinmiyor")}</p>
+  <p><b>Geliştirici:</b> ${escapeHTML(g.developer||"Bilinmiyor")}</p>
+  <p><b>Yayıncı:</b> ${escapeHTML(g.publisher||"Bilinmiyor")}</p>
+  <p><b>Çıkış tarihi:</b> ${escapeHTML(g.release_date||"Bilinmiyor")}</p>
+  ${g.game_url?`<a href="${safeUrl(g.game_url)}" target="_blank" rel="noopener" style="color:#8eafff">Oyunun sayfasını aç ↗</a>`:""}`;
+}
+function closeModal(){document.getElementById("detailModal").classList.remove("show")}
+
+function showSection(id,button){
+ document.querySelectorAll(".section").forEach(s=>s.classList.remove("active"));
+ document.getElementById(id).classList.add("active");
+ document.querySelectorAll("nav button").forEach(b=>b.classList.remove("active"));
+ if(button)button.classList.add("active");
+ else document.querySelectorAll("nav button").forEach(b=>{
+  if(b.getAttribute("onclick")?.includes("'"+id+"'"))b.classList.add("active");
+ });
+ window.scrollTo({top:0,behavior:"smooth"});
+}
+
+function addTier(){
+ const id=Number(document.getElementById("tierGame").value);
+ const level=document.getElementById("tierLevel").value;
+ const game=games.find(g=>Number(g.id)===id);
+ if(!game){alert("Önce bir oyun seç.");return;}
+ if(tiers.some(t=>t.id===id)){alert("Bu oyun zaten sıralamada.");return;}
+ tiers.push({id,title:game.title,level});
+ saveTiers();
+}
+function saveTiers(){
+ localStorage.setItem("gamevaultTiers",JSON.stringify(tiers));
+ renderTiers();
+}
+function removeTier(id){
+ tiers=tiers.filter(t=>t.id!==id);saveTiers();
+}
+function clearTiers(){
+ if(confirm("Tüm sıralamayı temizlemek istiyor musun?")){
+  tiers=[];saveTiers();
+ }
+}
+function renderTiers(){
+ const board=document.getElementById("tierBoard");
+ const colors={S:"#ff6969",A:"#ffae58",B:"#f5d76e",C:"#75c8a0",D:"#7aa9f5"};
+ board.innerHTML="";
+ ["S","A","B","C","D"].forEach(level=>{
+  const row=document.createElement("div");
+  row.className="tier-row";
+  const label=document.createElement("div");
+  label.className="tier-label";
+  label.style.background=colors[level];
+  label.textContent=level;
+  const items=document.createElement("div");
+  items.className="tier-items";
+  const list=tiers.filter(t=>t.level===level);
+  if(!list.length)items.innerHTML='<span class="small">Henüz oyun eklenmedi</span>';
+  list.forEach(t=>{
+   const chip=document.createElement("span");
+   chip.className="tier-game";
+   chip.textContent=t.title+" ";
+   const remove=document.createElement("button");
+   remove.textContent="×";
+   remove.style.cssText="border:0;background:none;color:#ff9999;font-size:16px";
+   remove.onclick=()=>removeTier(t.id);
+   chip.appendChild(remove);items.appendChild(chip);
+  });
+  row.append(label,items);board.appendChild(row);
+ });
+}
+
+function shuffle(arr){return [...arr].sort(()=>Math.random()-.5)}
+function getQuizPool(){return games.filter(g=>g.title&&g.short_description)}
+function nextQuiz(){
+ const pool=getQuizPool();
+ if(pool.length<2){document.getElementById("clueText").textContent="Yeterli oyun verisi bulunamadı.";return;}
+ let available=pool.filter(g=>!usedQuiz.includes(g.id));
+ if(!available.length){usedQuiz=[];available=pool}
+ currentQuiz=available[Math.floor(Math.random()*available.length)];
+ usedQuiz.push(currentQuiz.id);
+ const clues=[
+  "Bu oyunun açıklaması: "+currentQuiz.short_description,
+  "Bu oyunun türü: "+(currentQuiz.genre||"Bilinmiyor"),
+  "Bu oyunun platformu: "+(currentQuiz.platform||"Bilinmiyor")
+ ];
+ document.getElementById("clueTitle").textContent="Hangi oyundan bahsediyoruz?";
+ document.getElementById("clueText").textContent=shuffle(clues).slice(0,2).join(" ");
+ document.getElementById("quizResult").textContent="";
+ const wrong=shuffle(pool.filter(g=>g.id!==currentQuiz.id)).slice(0,3);
+ const choices=shuffle([currentQuiz,...wrong]);
+ const options=document.getElementById("quizOptions");options.innerHTML="";
+ choices.forEach(g=>{
+  const b=document.createElement("button");b.textContent=g.title;
+  b.onclick=()=>answerQuiz(g);options.appendChild(b);
+ });
+}
+function answerQuiz(g){
+ const result=document.getElementById("quizResult");
+ if(!currentQuiz)return;
+ document.querySelectorAll("#quizOptions button").forEach(b=>b.disabled=true);
+ if(g.id===currentQuiz.id){quizCorrect++;result.textContent="✅ Doğru cevap!";result.style.color="#70e0a2"}
+ else{result.textContent="❌ Yanlış cevap! Doğru cevap: "+currentQuiz.title;result.style.color="#ff8585"}
+ document.getElementById("quizScore").textContent="Doğru cevap: "+quizCorrect;
+}
+
+function nextLogo(){
+ const pool=games.filter(g=>g.thumbnail);
+ if(pool.length<2)return;
+ let available=pool.filter(g=>!usedLogo.includes(g.id));
+ if(!available.length){usedLogo=[];available=pool}
+ currentLogo=available[Math.floor(Math.random()*available.length)];
+ usedLogo.push(currentLogo.id);
+ const img=document.getElementById("logoImage");
+ img.src=safeUrl(currentLogo.thumbnail);img.style.display="block";
+ document.getElementById("logoPrompt").textContent="Bu görsel hangi oyuna ait?";
+ document.getElementById("logoResult").textContent="";
+ const wrong=shuffle(pool.filter(g=>g.id!==currentLogo.id)).slice(0,3);
+ const choices=shuffle([currentLogo,...wrong]);
+ const options=document.getElementById("logoOptions");options.innerHTML="";
+ choices.forEach(g=>{
+  const b=document.createElement("button");b.textContent=g.title;
+  b.onclick=()=>answerLogo(g);options.appendChild(b);
+ });
+}
+function answerLogo(g){
+ if(!currentLogo)return;
+ document.querySelectorAll("#logoOptions button").forEach(b=>b.disabled=true);
+ const result=document.getElementById("logoResult");
+ if(g.id===currentLogo.id){logoCorrect++;result.textContent="✅ Bildin!";result.style.color="#70e0a2"}
+ else{result.textContent="❌ Doğru cevap: "+currentLogo.title;result.style.color="#ff8585"}
+ document.getElementById("logoScore").textContent="Doğru cevap: "+logoCorrect;
+}
+
+renderTiers();
+loadGames();
+</script>
+</body>
+</html>
